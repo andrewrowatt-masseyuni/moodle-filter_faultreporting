@@ -15,23 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for Fault reporting
+ * Filter post install hook
  *
  * @package    filter_faultreporting
  * @copyright  2026 Andrew Rowatt <A.J.Rowatt@massey.ac.nz>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Switches the filter on, as it does nothing until a {faultreport} shortcode is used
+ */
+function xmldb_filter_faultreporting_install() {
+    global $CFG;
+    require_once("$CFG->libdir/filterlib.php");
 
-$plugin->component    = 'filter_faultreporting';
-$plugin->release      = '1.0';
-$plugin->version      = 2026080100;
-$plugin->requires     = 2024100700;
-$plugin->supported    = [405, 501];
-$plugin->maturity     = MATURITY_STABLE;
-
-// The fault report form, the link that opens it and its JavaScript all come from local_faultreporting.
-$plugin->dependencies = [
-    'local_faultreporting' => 2026080100,
-];
+    filter_set_global_state('faultreporting', TEXTFILTER_ON);
+}

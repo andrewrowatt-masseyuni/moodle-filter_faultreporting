@@ -22,4 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 class_alias(\filter_faultreporting\text_filter::class, \filter_faultreporting::class);

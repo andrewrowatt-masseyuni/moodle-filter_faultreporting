@@ -16,8 +16,13 @@
 
 namespace filter_faultreporting;
 
+use local_faultreporting\output\popup_link;
+
 /**
  * faultreporting filter
+ *
+ * Replaces the {faultreport} shortcode with a link that opens the local_faultreporting fault report
+ * form in a pop-up. Everything the link needs is provided by local_faultreporting.
  *
  * Documentation: {@link https://moodledev.io/docs/apis/plugintypes/filter}
  *
@@ -27,16 +32,52 @@ namespace filter_faultreporting;
  */
 class text_filter extends \core_filters\text_filter {
     /**
+     * The shortcode this filter replaces
+     */
+    private const SHORTCODE = '{faultreport}';
+
+    /**
+     * Load the pop-up JavaScript
+     *
+     * This has to happen before the page footer is generated, which is why it cannot wait until a
+     * shortcode is actually found.
+     *
+     * @param \moodle_page $page
+     * @param \context $context
+     */
+    #[\Override]
+    public function setup($page, $context) {
+        popup_link::require_js($page);
+    }
+
+    /**
      * Filter text
      *
      * @param string $text some HTML content to process.
      * @param array $options options passed to the filters
      * @return string the HTML content after the filtering has been applied.
      */
+    #[\Override]
     public function filter($text, array $options = []) {
-        if (stripos($text, '{faultreport}') !== false) {
-            // Replace the {faultreport} shortcode with a link to pop-up the fault report form
+        if (stripos($text, self::SHORTCODE) === false) {
+            return $text;
         }
+
+        return str_ireplace(self::SHORTCODE, popup_link::render($this->context), $text);
+    }
+
+    /**
+     * Leave the shortcode alone in headings, page titles and other plain string contexts
+     *
+     * format_string() strips tags after filtering, so a link inserted here would be reduced to its
+     * text, and the result is used in places where a link is not valid markup anyway.
+     *
+     * @param string $text
+     * @param array $options
+     * @return string
+     */
+    #[\Override]
+    public function filter_stage_string(string $text, array $options): string {
         return $text;
     }
 }
